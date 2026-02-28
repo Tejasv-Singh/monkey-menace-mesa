@@ -31,11 +31,12 @@ class Human(mesa.Agent):
             closest_monkey = min(monkeys, key=lambda m: chebyshev_distance(self.pos, m.pos))
             possible_steps = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False)
             
-            # Choose the step that maximizes distance from the closest monkey
+            # Choose the step that maximizes average distance from all nearby monkeys
             valid_steps = [p for p in possible_steps if self.model.grid.is_cell_empty(p) or not any(isinstance(a, Monkey) for a in self.model.grid.get_cell_list_contents([p]))]
             if not valid_steps:
                 valid_steps = possible_steps
-            best_step = max(valid_steps, key=lambda p: chebyshev_distance(p, closest_monkey.pos))
+            # Maximize the sum of distances to all visible monkeys
+            best_step = max(valid_steps, key=lambda p: sum(chebyshev_distance(p, m.pos) for m in monkeys))
             self.model.grid.move_agent(self, best_step)
         else:
             # Move towards the Safe Zone
@@ -64,13 +65,18 @@ class Monkey(mesa.Agent):
         # Steal paratha if in the same cell as a human with food
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         humans_with_food = [obj for obj in cellmates if isinstance(obj, Human) and obj.has_food]
+        all_humans = [obj for obj in cellmates if isinstance(obj, Human)]
         
         if humans_with_food:
-            target = humans_with_food[0]
-            target.has_food = False
-            self.satiated = True
-            self.model.stolen_meals += 1
-            # Acquired target!
+            # Pack Defense: the more humans in the cell, the lower the chance of a successful steal
+            # Steal chance = 1.0 / (number of humans)
+            steal_chance = 1.0 / len(all_humans)
+            if self.random.random() < steal_chance:
+                target = self.random.choice(humans_with_food) # Target a random human with food
+                target.has_food = False
+                self.satiated = True
+                self.model.stolen_meals += 1
+                # Acquired target!
 
         # Movement Phase
         if self.satiated or self.random.random() < self.random_error:
