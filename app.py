@@ -21,9 +21,30 @@ def agent_portrayal(agent):
 
 # Define model parameters to be controllable via the UI
 model_params = {
-    "num_humans": solara.SliderInt(label="Number of Students (Humans)", value=20, min=1, max=50),
-    "num_monkeys": solara.SliderInt(label="Number of Monkeys (Mega Troop)", value=10, min=1, max=50),
-    "random_error": solara.SliderFloat(label="Monkey Distractibility (Shiny Object factor)", value=0.2, min=0.0, max=1.0, step=0.1),
+    "num_humans": {
+        "type": "SliderInt",
+        "value": 20,
+        "label": "Number of Students (Humans)",
+        "min": 1,
+        "max": 50,
+        "step": 1,
+    },
+    "num_monkeys": {
+        "type": "SliderInt",
+        "value": 10,
+        "label": "Number of Monkeys (Mega Troop)",
+        "min": 1,
+        "max": 50,
+        "step": 1,
+    },
+    "random_error": {
+        "type": "SliderFloat",
+        "value": 0.2,
+        "label": "Monkey Distractibility (Shiny Object factor)",
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.1,
+    },
 }
 
 SpaceGraph = make_space_component(agent_portrayal)

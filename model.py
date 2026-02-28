@@ -103,9 +103,11 @@ class MonkeyMenaceModel(mesa.Model):
     """A model of monkeys terrorizing students for their food on campus."""
     def __init__(self, num_humans=10, num_monkeys=5, random_error=0.2):
         super().__init__()
-        self.num_humans = num_humans
-        self.num_monkeys = num_monkeys
-        self.random_error = random_error
+        
+        # When resetting via Solara, the slider provides a solara.Reactive or ValueElement
+        self.num_humans = getattr(num_humans, "value", num_humans)
+        self.num_monkeys = getattr(num_monkeys, "value", num_monkeys)
+        self.random_error = getattr(random_error, "value", random_error)
 
         # 20x20 campus grid
         self.grid = mesa.space.MultiGrid(20, 20, torus=False)
